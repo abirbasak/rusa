@@ -4,7 +4,7 @@ project(rusa VERSION 1.0.0 LANGUAGES CXX)
 file(GLOB_RECURSE HEADERS include/*.hpp)
 file(GLOB_RECURSE SOURCES source/*.cpp)
 add_library(rusa INTERFACE)
-target_sources(rusa INTERFACE ${HEADERS})
+add_custom_target(rusa-code SOURCES ${HEADERS} ${SOURCES})
 
 target_include_directories(rusa INTERFACE include)
 target_compile_features(rusa INTERFACE cxx_std_17)
