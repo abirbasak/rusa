@@ -3,6 +3,7 @@ project(rusa VERSION 1.0.0 LANGUAGES CXX)
 
 file(GLOB_RECURSE HEADERS include/*.hpp)
 file(GLOB_RECURSE SOURCES source/*.cpp)
+
 add_library(rusa INTERFACE)
 add_custom_target(rusa-code SOURCES ${HEADERS} ${SOURCES})
 
@@ -15,3 +16,9 @@ if(RUSA_BUILD_EXAMPLES)
     add_executable(rusa-simple examples/simple.cpp)
     target_link_libraries(rusa-simple rusa)
 endif()
+
+project(rusa-test VERSION 1.0.0 LANGUAGES CXX)
+file(GLOB_RECURSE TEST-SOURCES test/*.cpp)
+add_executable(rusa-test ${TEST-SOURCES})
+target_link_libraries(rusa-test rusa)
+

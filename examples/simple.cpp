@@ -1,4 +1,4 @@
-#include <azuik/test/unit_test.hpp>
+#include <azuik/tool/unit_test.hpp>
 #include <vector>
 AZUIK_TEST_SUIT(simple)
 {
@@ -12,7 +12,7 @@ AZUIK_TEST_SUIT(simple)
         AZUIK_TEST(v[2] == 30);
     }
 }
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-    azuik::test::execute(argc, argv);
+    azuik::tool::run_test(argc, argv);
 }
