@@ -130,9 +130,9 @@ namespace azuik
         AZUIK_IS_PRINTABLE_SPCL(signed long, % i, v);
         AZUIK_IS_PRINTABLE_SPCL(unsigned long long, % i, v);
         AZUIK_IS_PRINTABLE_SPCL(signed long long, % i, v);
-        AZUIK_IS_PRINTABLE_SPCL(float, % d, v);
-        AZUIK_IS_PRINTABLE_SPCL(double, % d, v);
-        AZUIK_IS_PRINTABLE_SPCL(long double, % d, v);
+        AZUIK_IS_PRINTABLE_SPCL(float, % g, v);
+        AZUIK_IS_PRINTABLE_SPCL(double, % g, v);
+        AZUIK_IS_PRINTABLE_SPCL(long double, % g, v);
 #undef AZUIK_IS_PRINTABLE_SPCL
 
         namespace detail_
@@ -228,19 +228,19 @@ namespace azuik
     } // namespace tool
 } // namespace azuik
 
-#    define AZUIK_TEST(expr)                                                                       \
-        ::azuik::tool::formatter::test(::azuik::tool::detail_::attach{}->*expr, #expr, __FILE__,   \
-                                       __LINE__)
+#define AZUIK_TEST(expr)                                                                           \
+    ::azuik::tool::formatter::test(::azuik::tool::detail_::attach{}->*expr, #expr, __FILE__,       \
+                                   __LINE__)
 
-#    define AZUIK_TEST_SUIT(NAME) namespace azuik_test_##NAME
+#define AZUIK_TEST_SUIT(NAME) namespace azuik_test_##NAME
 
-#    define AZUIK_TEST_CASE(NAME)                                                                  \
-        struct azuik_test_##NAME : ::azuik::tool::test_case {                                      \
-            azuik_test_##NAME()                                                                    \
-                : ::azuik::tool::test_case(#NAME)                                                  \
-            {}                                                                                     \
-            void exec();                                                                           \
-        } const azuik_test_instance_##NAME{};                                                      \
-        inline void azuik_test_##NAME::exec()
+#define AZUIK_TEST_CASE(NAME)                                                                      \
+    struct azuik_test_##NAME : ::azuik::tool::test_case {                                          \
+        azuik_test_##NAME()                                                                        \
+            : ::azuik::tool::test_case(#NAME)                                                      \
+        {}                                                                                         \
+        void exec();                                                                               \
+    } const azuik_test_instance_##NAME{};                                                          \
+    inline void azuik_test_##NAME::exec()
 
 #endif
