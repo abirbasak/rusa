@@ -225,6 +225,43 @@ namespace azuik
                 }
             }
         } constexpr run_test{};
+
+        template <class T>
+        struct tag {
+            using type = T;
+        };
+        template <class T>
+        using tag_type = typename T::type;
+
+        template <class... T>
+        struct typelist;
+
+        namespace detail
+        {
+            template <class... Ts>
+            struct for_each_impl;
+
+            template <class... Ts>
+            struct for_each_impl<typelist<Ts...>> {
+                template <class F>
+                static void apply(F&& f)
+                {
+                    using discard = int[];
+                    (void)discard{0, (void(f(tag<Ts>{})), 0)...};
+                }
+            };
+        } // namespace detail
+
+        template <class TL, class F>
+        void for_each_type(F&& f)
+        {
+            detail::for_each_impl<TL>::template apply(static_cast<F&&>(f));
+        }
+        template <class... Ts, class F>
+        void for_each_type(F&& f)
+        {
+            detail::for_each_impl<typelist<Ts...>>::template apply(static_cast<F&&>(f));
+        }
     } // namespace tool
 } // namespace azuik
 
