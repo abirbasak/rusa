@@ -280,6 +280,39 @@ namespace azuik
         {
             detail::for_each_impl<typelist<Ts...>>::template apply(static_cast<F&&>(f));
         }
+
+        struct string_view {
+            char const* data;
+            std::size_t size;
+            explicit string_view(char const* s) noexcept
+                : data{s}
+                , size(std::strlen(s))
+            {}
+            constexpr string_view(char const* s, std::size_t n) noexcept
+                : data{s}
+                , size{n}
+            {}
+        };
+
+        template <class T>
+        constexpr auto type_name() -> string_view
+        {
+            using namespace std;
+#ifdef __clang__
+            string_view p = __PRETTY_FUNCTION__;
+            return {p.data + 34, p.size - 34 - 1};
+#elif defined(__GNUC__)
+            string_view p = __PRETTY_FUNCTION__;
+#    if __cplusplus < 201402
+            return {p.data() + 36, p.size() - 36 - 1};
+#    else
+            return {p.data() + 49, p.find(';', 49) - 49};
+#    endif
+#elif defined(_MSC_VER)
+            string_view p = __FUNCSIG__;
+            return {p.data() + 84, p.size() - 84 - 7};
+#endif
+        }
     } // namespace tool
 } // namespace azuik
 
