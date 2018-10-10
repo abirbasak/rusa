@@ -1,6 +1,8 @@
 #ifndef AZUIK_TOOL_UNIT_TEST_HPP
 #define AZUIK_TOOL_UNIT_TEST_HPP
 #include <cstdio>
+#include <cstdarg>
+#include <cstring>
 
 namespace azuik
 {
@@ -21,6 +23,11 @@ namespace azuik
                 , m_prev{this}
                 , m_next{this}
             {}
+            test_case(test_case const&) = delete;
+            test_case(test_case&&) = delete;
+            void operator=(test_case const&) = delete;
+            void operator=(test_case&&) = delete;
+
             constexpr char const* name() const noexcept
             {
                 return m_name;
@@ -39,7 +46,7 @@ namespace azuik
                 return &head;
             }
             virtual void exec() {}
-            virtual ~test_case() {}
+            virtual ~test_case() = default;
 
         private:
             char const* m_name;
@@ -212,11 +219,22 @@ namespace azuik
                 char const* kind = result.value ? "SUCCESS" : "FAILED";
                 std::printf("%s(%s,%d) : %s [%s]\n", kind, file, line, expr, result.str.value);
             }
+            static void log(char const* file, int line, char const* fmt, ...) noexcept
+            {
+                char buf[256];
+                std::va_list args;
+                va_start(args, fmt);
+                std::vsnprintf(buf, 256, fmt, args);
+                va_end(args);
+                std::printf("LOG(%s,%d) : %s\n", file, line, buf);
+            }
         };
 
         struct run_test_fn {
             void operator()(int argc, char* argv[]) const
             {
+                (void)argc;
+                (void)argv;
                 test_case const* head = test_case::head();
                 for (test_case* cur = head->next(); cur != head; cur = cur->next())
                 {
@@ -268,6 +286,7 @@ namespace azuik
 #define AZUIK_TEST(expr)                                                                           \
     ::azuik::tool::formatter::test(::azuik::tool::detail_::attach{}->*expr, #expr, __FILE__,       \
                                    __LINE__)
+#define AZUIK_TEST_LOG(...) ::azuik::tool::formatter::log(__FILE__, __LINE__, __VA_ARGS__)
 
 #define AZUIK_TEST_SUIT(NAME) namespace azuik_test_##NAME
 
