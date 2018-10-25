@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cstdarg>
 #include <cstring>
+#include <cstddef>
 
 namespace azuik
 {
@@ -282,16 +283,48 @@ namespace azuik
         }
 
         struct string_view {
-            char const* data;
-            std::size_t size;
-            explicit string_view(char const* s) noexcept
-                : data{s}
-                , size(std::strlen(s))
+            using value_type = char;
+            using size_type = std::size_t;
+            using difference_type = std::ptrdiff_t;
+            using pointer = char const*;
+            using const_pointer = char const*;
+            using reference = char const&;
+            using const_reference = char const&;
+            using iterator = char const*;
+            using const_iterator = char const*;
+
+            explicit string_view(pointer s) noexcept
+                : m_data{s}
+                , m_size(std::strlen(s))
             {}
-            constexpr string_view(char const* s, std::size_t n) noexcept
-                : data{s}
-                , size{n}
+            constexpr string_view(pointer s, size_type n) noexcept
+                : m_data{s}
+                , m_size{n}
             {}
+            constexpr auto data() const noexcept -> const_pointer
+            {
+                return m_data;
+            }
+            constexpr auto size() const noexcept -> size_type
+            {
+                return m_size;
+            }
+            constexpr auto empty() const noexcept -> bool
+            {
+                return 0 == m_size;
+            }
+            constexpr auto begin() const noexcept -> const_iterator
+            {
+                return m_data;
+            }
+            constexpr auto end() const noexcept -> const_iterator
+            {
+                return m_data + m_size;
+            }
+
+        private:
+            pointer m_data;
+            size_type m_size;
         };
 
         template <class T>
@@ -301,7 +334,7 @@ namespace azuik
             int offset = 55;
 #ifdef __clang__
             string_view p{__PRETTY_FUNCTION__};
-            return {p.data + offset, p.size - offset - 1};
+            return {p.data() + offset, p.size() - offset - 1};
 #elif defined(__GNUC__)
             string_view p = __PRETTY_FUNCTION__;
 #    if __cplusplus < 201402
