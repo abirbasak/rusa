@@ -282,24 +282,30 @@ namespace azuik
             detail::for_each_impl<typelist<Ts...>>::template apply(static_cast<F&&>(f));
         }
 
-        struct string_view {
-            using value_type = char;
+        template <class T>
+        struct range_view {
+            using value_type = T;
             using size_type = std::size_t;
             using difference_type = std::ptrdiff_t;
-            using pointer = char const*;
-            using const_pointer = char const*;
-            using reference = char const&;
-            using const_reference = char const&;
-            using iterator = char const*;
-            using const_iterator = char const*;
+            using pointer = T const*;
+            using const_pointer = T const*;
+            using reference = T const&;
+            using const_reference = T const&;
+            using iterator = T const*;
+            using const_iterator = T const*;
 
-            explicit string_view(pointer s) noexcept
-                : m_data{s}
-                , m_size(std::strlen(s))
+            range_view() noexcept
+                : m_data{nullptr}
+                , m_size{0}
             {}
-            constexpr string_view(pointer s, size_type n) noexcept
-                : m_data{s}
+
+            constexpr range_view(pointer f, size_type n) noexcept
+                : m_data{f}
                 , m_size{n}
+            {}
+            constexpr range_view(pointer f, pointer l) noexcept
+                : m_data{f}
+                , m_size{l - f}
             {}
             constexpr auto data() const noexcept -> const_pointer
             {
@@ -327,13 +333,19 @@ namespace azuik
             size_type m_size;
         };
 
+        using string_view = range_view<char>;
+        inline auto as_literal(char const* s) -> string_view
+        {
+            return string_view{s, std::strlen(s)};
+        }
+
         template <class T>
         constexpr auto type_name() -> string_view
         {
             using namespace std;
             int offset = 55;
 #ifdef __clang__
-            string_view p{__PRETTY_FUNCTION__};
+            string_view p = as_literal(__PRETTY_FUNCTION__);
             return {p.data() + offset, p.size() - offset - 1};
 #elif defined(__GNUC__)
             string_view p = __PRETTY_FUNCTION__;
@@ -347,6 +359,63 @@ namespace azuik
             return {p.data() + offset + 50, p.size() - offset - 50 - 7};
 #endif
         }
+
+        class command_line {
+        public:
+            constexpr command_line(int argc, char const** argv) noexcept
+                : m_argc{argc}
+                , m_argv{argv}
+            {}
+
+        public:
+            auto contains(string_view key) const noexcept -> bool
+            {
+                for (auto const& s : range_view{m_argv, static_cast<std::size_t>(m_argc)})
+                {
+                    if (starts_with(s, key.data()))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            auto contains(char const* key) const noexcept -> bool
+            {
+                return contains(as_literal(key));
+            }
+            auto value(string_view key) const noexcept -> string_view
+            {
+                for (auto const& s : range_view{m_argv, static_cast<std::size_t>(m_argc)})
+                {
+                    if (starts_with(s, key.data()))
+                    {
+                        if (char const* p = ::strchr(s, '='); p != nullptr)
+                        {
+                            return as_literal(p + 1);
+                        }
+                        else
+                        {
+                            return as_literal("");
+                        }
+                    }
+                }
+                return string_view{};
+            }
+            auto value(char const* key) const noexcept -> string_view
+            {
+                return value(as_literal(key));
+            }
+
+        private:
+            auto starts_with(char const* s, char const* prefix) const noexcept -> bool
+            {
+                return 0 == ::strncmp(prefix, s, ::strlen(prefix));
+            }
+
+        private:
+            int m_argc;
+            char const** m_argv;
+        };
     } // namespace tool
 } // namespace azuik
 

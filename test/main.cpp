@@ -1,6 +1,7 @@
 #include <azuik/tool/unit_test.hpp>
-#include <azuik/tool/command_line.hpp>
+
 #include <vector>
+#include <iostream>
 
 AZUIK_TEST_SUIT(command_line)
 {
@@ -13,6 +14,9 @@ AZUIK_TEST_SUIT(command_line)
         AZUIK_TEST(cmd.contains("--include") == true);
         AZUIK_TEST(cmd.contains("build") == true);
         AZUIK_TEST(cmd.contains("--link") == false);
+        AZUIK_TEST(cmd.contains("--link") == false);
+        std::cout << cmd.value("build").data() << std::endl;
+        AZUIK_TEST(std::strcmp(cmd.value("--include").data(), "abc") == 0);
     }
 }
 int main(int argc, char* argv[])
