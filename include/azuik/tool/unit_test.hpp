@@ -348,14 +348,14 @@ namespace azuik
             string_view p = as_literal(__PRETTY_FUNCTION__);
             return {p.data() + offset, p.size() - offset - 1};
 #elif defined(__GNUC__)
-            string_view p = __PRETTY_FUNCTION__;
+            string_view p = as_literal(__PRETTY_FUNCTION__);
 #    if __cplusplus < 201402
             return {p.data() + offset + 2, p.size() - offset - 2 - 1};
 #    else
             return {p.data() + 49, p.find(';', 49) - 49};
 #    endif
 #elif defined(_MSC_VER)
-            string_view p = __FUNCSIG__;
+            string_view p = as_literal(__FUNCSIG__);
             return {p.data() + offset + 50, p.size() - offset - 50 - 7};
 #endif
         }
